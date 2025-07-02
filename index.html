@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Încasări Magazin</title>
+  <link rel="stylesheet" href="style.css" />
+  <script type="module" src="script.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Încasări Magazin</h1>
+    <form id="income-form">
+      <input type="date" id="date" required />
+      <input type="number" id="amount" placeholder="Suma (lei)" required />
+      <button type="submit">Adaugă</button>
+    </form>
+
+    <h2>Încasări Luna Curentă</h2>
+    <div id="income-list"></div>
+
+    <div class="summary">
+      <p><strong>Total lunar:</strong> <span id="monthly-total">0</span> lei</p>
+    </div>
+  </div>
+</body>
+</html>

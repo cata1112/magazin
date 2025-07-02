@@ -3,63 +3,77 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Încasări Magazin</title>
+  <title>Incasări Magazin</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      margin: 20px;
       max-width: 600px;
-      margin: 20px auto;
-      padding: 10px;
-    }
-    input[type="number"], input[type="date"] {
-      padding: 8px;
-      margin: 5px 0;
-      width: 100%;
+      background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+      color: #222;
+      min-height: 100vh;
+      padding: 20px;
       box-sizing: border-box;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
     }
-    label {
-      font-weight: bold;
-      margin-top: 10px;
-      display: block;
-    }
-    #income-list {
+    form, #income-list {
       margin-top: 20px;
     }
     .entry {
       border-bottom: 1px solid #ccc;
       padding: 6px 0;
     }
-    #monthly-total {
-      font-weight: bold;
-      margin-top: 15px;
-      font-size: 1.2em;
+    label {
+      margin-right: 5px;
+    }
+    input[type="number"] {
+      width: 80px;
+      margin-right: 10px;
     }
   </style>
 </head>
 <body>
-  <h1>Înregistrare încasări magazin</h1>
-  <form id="income-form">
-    <label for="date">Data</label>
-    <input type="date" id="date" required />
 
-    <label for="maruntele">Maruntele (lei)</label>
-    <input type="number" id="maruntele" min="0" step="0.01" value="0" required />
+<h1>Introducere încasări</h1>
 
-    <label for="mascate">Mascate (lei)</label>
-    <input type="number" id="mascate" min="0" step="0.01" value="0" required />
+<form id="income-form">
+  <label for="date">Data:</label>
+  <input type="date" id="date" required />
 
-    <label for="card">Card (lei)</label>
-    <input type="number" id="card" min="0" step="0.01" value="0" required />
+  <label for="maruntele">Maruntele (lei):</label>
+  <input type="number" id="maruntele" min="0" step="0.01" value="0" />
 
-    <label for="total">Total (lei)</label>
-    <input type="number" id="total" readonly value="0.00" />
+  <label for="mascate">Mascate (lei):</label>
+  <input type="number" id="mascate" min="0" step="0.01" value="0" />
 
-    <button type="submit" style="margin-top:15px;">Adaugă încasare</button>
-  </form>
+  <label for="card">Card (lei):</label>
+  <input type="number" id="card" min="0" step="0.01" value="0" />
 
-  <div id="income-list"></div>
-  <div id="monthly-total">Total lună: 0.00 lei</div>
+  <label for="total">Total (lei):</label>
+  <input type="number" id="total" readonly value="0.00" />
 
-  <script type="module" src="app.js"></script>
+  <button type="submit">Adaugă</button>
+</form>
+
+<hr/>
+
+<h2>Filtrează încasările</h2>
+
+<form id="filter-form">
+  <label for="month">Luna:</label>
+  <select id="month" name="month"></select>
+
+  <label for="year">Anul:</label>
+  <select id="year" name="year"></select>
+
+  <button type="submit">Filtrează</button>
+</form>
+
+<div id="income-list"></div>
+
+<h3 id="monthly-total">Total lună: 0.00 lei</h3>
+
+<script type="module" src="app.js"></script>
 </body>
 </html>

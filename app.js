@@ -84,12 +84,18 @@ async function loadData() {
 
   snapshot.forEach((doc) => {
     const data = doc.data();
+    console.log("Date doc:", data); // aici vezi datele din fiecare document
     const entryDate = new Date(data.date);
     const entryMonth = entryDate.getMonth() + 1;
     const entryYear = entryDate.getFullYear();
 
     if (entryMonth === currentMonth && entryYear === currentYear) {
-      total += parseFloat(data.total) || 0;
+      const docTotal = parseFloat(data.total);
+      if (isNaN(docTotal)) {
+        console.warn("Total invalid la doc:", doc.id, data.total);
+      }
+      total += isNaN(docTotal) ? 0 : docTotal;
+
       const div = document.createElement("div");
       div.className = "entry";
       div.textContent = `${data.date} - Maruntele: ${data.maruntele} lei, Mascate: ${data.mascate} lei, Card: ${data.card} lei, Total: ${data.total} lei`;

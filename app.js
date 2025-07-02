@@ -6,7 +6,6 @@ import {
   getDocs
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-// Firebase config - verifică să fie identic cu cel din Firebase Console
 const firebaseConfig = {
   apiKey: "AIzaSyCDYP2Eg05JnvqaLC86_RwuGGdylZAqHvM",
   authDomain: "incasari-magazin.firebaseapp.com",
@@ -28,7 +27,6 @@ const totalInput = document.getElementById("total");
 const incomeList = document.getElementById("income-list");
 const monthlyTotal = document.getElementById("monthly-total");
 
-// Calculează totalul la fiecare modificare
 function updateTotal() {
   const maruntele = parseFloat(marunteleInput.value) || 0;
   const mascate = parseFloat(mascateInput.value) || 0;
@@ -91,7 +89,7 @@ async function loadData() {
     const entryYear = entryDate.getFullYear();
 
     if (entryMonth === currentMonth && entryYear === currentYear) {
-      total += data.total;
+      total += parseFloat(data.total) || 0;
       const div = document.createElement("div");
       div.className = "entry";
       div.textContent = `${data.date} - Maruntele: ${data.maruntele} lei, Mascate: ${data.mascate} lei, Card: ${data.card} lei, Total: ${data.total} lei`;

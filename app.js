@@ -6,6 +6,7 @@ import {
   getDocs
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
+// Configurația Firebase ta:
 const firebaseConfig = {
   apiKey: "AIzaSyCDYP2Eg05JnvqaLC86_RwuGGdylZAqHvM",
   authDomain: "incasari-magazin.firebaseapp.com",
@@ -24,9 +25,36 @@ const marunteleInput = document.getElementById("maruntele");
 const mascateInput = document.getElementById("mascate");
 const cardInput = document.getElementById("card");
 const totalInput = document.getElementById("total");
+
+const filterForm = document.getElementById("filter-form");
+const monthSelect = document.getElementById("month");
+const yearSelect = document.getElementById("year");
+
 const incomeList = document.getElementById("income-list");
 const monthlyTotal = document.getElementById("monthly-total");
 
+// Completează lunile (1-12)
+for (let m = 1; m <= 12; m++) {
+  const option = document.createElement("option");
+  option.value = m;
+  option.textContent = m;
+  monthSelect.appendChild(option);
+}
+
+// Completează anii (2020 - anul curent + 1)
+const currentYear = new Date().getFullYear();
+for (let y = 2020; y <= currentYear + 1; y++) {
+  const option = document.createElement("option");
+  option.value = y;
+  option.textContent = y;
+  yearSelect.appendChild(option);
+}
+
+// Setează selecturile pe luna și anul curent implicit
+monthSelect.value = new Date().getMonth() + 1;
+yearSelect.value = currentYear;
+
+// Actualizează totalul automat când se modifică valorile
 function updateTotal() {
   const maruntele = parseFloat(marunteleInput.value) || 0;
   const mascate = parseFloat(mascateInput.value) || 0;
@@ -70,30 +98,30 @@ form.addEventListener("submit", async (e) => {
   form.reset();
   totalInput.value = "0.00";
 
-  loadData();
+  // După adăugare reîncarcă lista cu filtrul curent
+  loadData(parseInt(monthSelect.value), parseInt(yearSelect.value));
 });
 
-async function loadData() {
-  const now = new Date();
-  const currentMonth = now.getMonth() + 1;
-  const currentYear = now.getFullYear();
+filterForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const selectedMonth = parseInt(monthSelect.value);
+  const selectedYear = parseInt(yearSelect.value);
+  loadData(selectedMonth, selectedYear);
+});
 
+async function loadData(selectedMonth, selectedYear) {
   const snapshot = await getDocs(collection(db, "incasari"));
   incomeList.innerHTML = "";
   let total = 0;
 
   snapshot.forEach((doc) => {
     const data = doc.data();
-    console.log("Date doc:", data); // aici vezi datele din fiecare document
     const entryDate = new Date(data.date);
     const entryMonth = entryDate.getMonth() + 1;
     const entryYear = entryDate.getFullYear();
 
-    if (entryMonth === currentMonth && entryYear === currentYear) {
+    if (entryMonth === selectedMonth && entryYear === selectedYear) {
       const docTotal = parseFloat(data.total);
-      if (isNaN(docTotal)) {
-        console.warn("Total invalid la doc:", doc.id, data.total);
-      }
       total += isNaN(docTotal) ? 0 : docTotal;
 
       const div = document.createElement("div");
@@ -103,7 +131,11 @@ async function loadData() {
     }
   });
 
-  monthlyTotal.textContent = `Total lună: ${total.toFixed(2)} lei`;
+  monthlyTotal.textContent = `Total pentru ${selectedMonth}/${selectedYear}: ${total.toFixed(2)} lei`;
 }
 
-document.addEventListener("DOMContentLoaded", loadData);
+document.addEventListener("DOMContentLoaded", () => {
+  const now = new Date();
+  loadData(now.getMonth() + 1, now.getFullYear());
+  updateTotal();
+});

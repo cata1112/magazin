@@ -1,137 +1,58 @@
 <!DOCTYPE html>
 <html lang="ro">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Urmărire încasări magazin</title>
-<style>
-  body { font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto; padding: 10px; }
-  h1, h2 { text-align: center; }
-  form { margin-bottom: 20px; }
-  label { display: block; margin: 10px 0 5px; }
-  input[type="date"], input[type="number"] { width: 100%; padding: 8px; box-sizing: border-box; }
-  button { padding: 10px 20px; margin-top: 10px; cursor: pointer; }
-  .entry { border-bottom: 1px solid #ddd; padding: 5px 0; }
-  .month-archive { margin-top: 30px; border-top: 2px solid #444; padding-top: 15px; }
-  .month-archive h3 { margin-bottom: 5px; }
-  .total { font-weight: bold; margin-top: 10px; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Încasări Magazin</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 30px auto;
+      padding: 0 15px;
+    }
+    form {
+      margin-bottom: 20px;
+    }
+    input, button {
+      padding: 10px;
+      margin-right: 10px;
+      font-size: 1rem;
+    }
+    #income-list .entry {
+      margin: 5px 0;
+      padding: 6px 10px;
+      background: #f0f0f0;
+      border-radius: 4px;
+    }
+    #monthly-total {
+      font-weight: bold;
+      font-size: 1.2rem;
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
 
-<h1>Urmărire încasări magazin</h1>
+  <h1>Înregistrare încasări zilnice</h1>
 
-<form id="income-form">
-  <label for="date">Data:</label>
-  <input type="date" id="date" required />
+  <form id="income-form">
+    <label for="date">Data:</label>
+    <input type="date" id="date" required />
+    
+    <label for="amount">Sumă (lei):</label>
+    <input type="number" step="0.01" id="amount" required min="0" />
+    
+    <button type="submit">Adaugă</button>
+  </form>
 
-  <label for="amount">Sumă (lei):</label>
-  <input type="number" id="amount" step="0.01" min="0" required />
-
-  <button type="submit">Adaugă încasare</button>
-</form>
-
-<section>
   <h2>Încasări luna curentă</h2>
   <div id="income-list"></div>
-  <div class="total">Total luna aceasta: <span id="monthly-total">0.00</span> lei</div>
-</section>
 
-<section>
-  <h2>Arhiva lunilor anterioare</h2>
-  <div id="archive-list"></div>
-</section>
+  <div>
+    Total încasări luna aceasta: <span id="monthly-total">0.00</span> lei
+  </div>
 
-<script>
-  const form = document.getElementById('income-form');
-  const dateInput = document.getElementById('date');
-  const amountInput = document.getElementById('amount');
-  const incomeList = document.getElementById('income-list');
-  const monthlyTotal = document.getElementById('monthly-total');
-  const archiveList = document.getElementById('archive-list');
-
-  // Stocare localStorage sub cheia "incasariPeLuni"
-  // Structura: { "YYYY-MM": [ { date: "YYYY-MM-DD", amount: number }, ... ], ... }
-
-  function loadData() {
-    const data = JSON.parse(localStorage.getItem('incasariPeLuni') || '{}');
-    const now = new Date();
-    const currentMonthKey = now.toISOString().slice(0,7); // "YYYY-MM"
-
-    incomeList.innerHTML = '';
-    archiveList.innerHTML = '';
-    let totalCurrentMonth = 0;
-
-    // Afișează încasările lunii curente
-    if(data[currentMonthKey]) {
-      data[currentMonthKey].forEach(entry => {
-        totalCurrentMonth += entry.amount;
-        const div = document.createElement('div');
-        div.className = 'entry';
-        div.textContent = `${entry.date} - ${entry.amount.toFixed(2)} lei`;
-        incomeList.appendChild(div);
-      });
-    }
-
-    monthlyTotal.textContent = totalCurrentMonth.toFixed(2);
-
-    // Afișează arhiva lunilor anterioare (descrescător, excluzând luna curentă)
-    const months = Object.keys(data).filter(m => m !== currentMonthKey).sort((a,b) => b.localeCompare(a));
-    months.forEach(monthKey => {
-      const entries = data[monthKey];
-      let monthTotal = 0;
-      const section = document.createElement('section');
-      section.className = 'month-archive';
-
-      const monthName = new Date(monthKey + '-01').toLocaleString('ro-RO', { year: 'numeric', month: 'long' });
-      const header = document.createElement('h3');
-      header.textContent = monthName;
-      section.appendChild(header);
-
-      entries.forEach(entry => {
-        monthTotal += entry.amount;
-        const div = document.createElement('div');
-        div.className = 'entry';
-        div.textContent = `${entry.date} - ${entry.amount.toFixed(2)} lei`;
-        section.appendChild(div);
-      });
-
-      const totalDiv = document.createElement('div');
-      totalDiv.className = 'total';
-      totalDiv.textContent = `Total: ${monthTotal.toFixed(2)} lei`;
-      section.appendChild(totalDiv);
-
-      archiveList.appendChild(section);
-    });
-  }
-
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-
-    const dateVal = dateInput.value;
-    const amountVal = parseFloat(amountInput.value);
-    if (!dateVal || isNaN(amountVal) || amountVal < 0) return;
-
-    const monthKey = dateVal.slice(0,7);
-    const data = JSON.parse(localStorage.getItem('incasariPeLuni') || '{}');
-
-    if(!data[monthKey]) data[monthKey] = [];
-    data[monthKey].push({ date: dateVal, amount: amountVal });
-
-    localStorage.setItem('incasariPeLuni', JSON.stringify(data));
-
-    dateInput.value = '';
-    amountInput.value = '';
-
-    loadData();
-  });
-
-  // Inițializează data cu ziua curentă
-  dateInput.value = new Date().toISOString().slice(0,10);
-
-  loadData();
-</script>
-<script type="module" src="app.js"></script>
-  
+  <script type="module" src="app.js"></script>
 </body>
 </html>

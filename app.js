@@ -1,6 +1,12 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
+// Firebase config - verifică să fie identic cu cel din Firebase Console
 const firebaseConfig = {
   apiKey: "AIzaSyCDYP2Eg05JnvqaLC86_RwuGGdylZAqHvM",
   authDomain: "incasari-magazin.firebaseapp.com",
@@ -22,17 +28,18 @@ const totalInput = document.getElementById("total");
 const incomeList = document.getElementById("income-list");
 const monthlyTotal = document.getElementById("monthly-total");
 
-// Calculează totalul automat când se modifică vreun câmp
-function calcTotal() {
+// Calculează totalul la fiecare modificare
+function updateTotal() {
   const maruntele = parseFloat(marunteleInput.value) || 0;
   const mascate = parseFloat(mascateInput.value) || 0;
   const card = parseFloat(cardInput.value) || 0;
-  totalInput.value = (maruntele + mascate + card).toFixed(2);
+  const total = maruntele + mascate + card;
+  totalInput.value = total.toFixed(2);
 }
 
-marunteleInput.addEventListener("input", calcTotal);
-mascateInput.addEventListener("input", calcTotal);
-cardInput.addEventListener("input", calcTotal);
+marunteleInput.addEventListener("input", updateTotal);
+mascateInput.addEventListener("input", updateTotal);
+cardInput.addEventListener("input", updateTotal);
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -48,15 +55,20 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
-  await addDoc(collection(db, "incasari"), {
-    date,
-    maruntele,
-    mascate,
-    card,
-    total
-  });
+  try {
+    await addDoc(collection(db, "incasari"), {
+      date,
+      maruntele,
+      mascate,
+      card,
+      total
+    });
+    console.log("Document adăugat cu succes");
+  } catch (error) {
+    console.error("Eroare la adăugarea documentului:", error);
+    alert("Eroare la salvarea datelor. Vezi consola.");
+  }
 
-  // Resetează formularul
   form.reset();
   totalInput.value = "0.00";
 
@@ -67,26 +79,27 @@ async function loadData() {
   const now = new Date();
   const currentMonth = now.getMonth() + 1;
   const currentYear = now.getFullYear();
+
   const snapshot = await getDocs(collection(db, "incasari"));
   incomeList.innerHTML = "";
-  let totalLuna = 0;
+  let total = 0;
 
-  snapshot.forEach(doc => {
+  snapshot.forEach((doc) => {
     const data = doc.data();
     const entryDate = new Date(data.date);
     const entryMonth = entryDate.getMonth() + 1;
     const entryYear = entryDate.getFullYear();
 
     if (entryMonth === currentMonth && entryYear === currentYear) {
-      totalLuna += Number(data.total);
+      total += data.total;
       const div = document.createElement("div");
       div.className = "entry";
-      div.textContent = `${data.date} - Marunțele: ${data.maruntele} lei, Mascate: ${data.mascate} lei, Card: ${data.card} lei, Total: ${data.total.toFixed(2)} lei`;
+      div.textContent = `${data.date} - Maruntele: ${data.maruntele} lei, Mascate: ${data.mascate} lei, Card: ${data.card} lei, Total: ${data.total} lei`;
       incomeList.appendChild(div);
     }
   });
 
-  monthlyTotal.textContent = `Total luna aceasta: ${totalLuna.toFixed(2)} lei`;
+  monthlyTotal.textContent = `Total lună: ${total.toFixed(2)} lei`;
 }
 
 document.addEventListener("DOMContentLoaded", loadData);
